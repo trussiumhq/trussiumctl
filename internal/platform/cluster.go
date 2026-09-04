@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -16,6 +17,10 @@ type CommandRunner interface {
 	Run(name string, args ...string) ([]byte, error)
 }
 
+type InputRunner interface {
+	RunInput(name string, input []byte, args ...string) ([]byte, error)
+}
+
 type ExecRunner struct{ Timeout time.Duration }
 
 func (r ExecRunner) Run(name string, args ...string) ([]byte, error) {
@@ -26,6 +31,25 @@ func (r ExecRunner) Run(name string, args ...string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	output, err := exec.CommandContext(ctx, name, args...).Output()
+	if err != nil {
+		return nil, fmt.Errorf("%s command failed", name)
+	}
+	if len(output) > maxCommandOutput {
+		return nil, fmt.Errorf("%s returned oversized output", name)
+	}
+	return output, nil
+}
+
+func (r ExecRunner) RunInput(name string, input []byte, args ...string) ([]byte, error) {
+	timeout := r.Timeout
+	if timeout <= 0 {
+		timeout = 10 * time.Second
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	command := exec.CommandContext(ctx, name, args...)
+	command.Stdin = bytes.NewReader(input)
+	output, err := command.Output()
 	if err != nil {
 		return nil, fmt.Errorf("%s command failed", name)
 	}
