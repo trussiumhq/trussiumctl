@@ -21,4 +21,4 @@ jobs:
       - run: go vet ./...
       - uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.4
+          version: v2.6
