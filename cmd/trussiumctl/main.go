@@ -41,6 +41,12 @@ func main() {
 		}
 		return
 	}
+	if len(os.Args) > 1 && os.Args[1] == "install" {
+		if runInstall(os.Args[2:]) != nil {
+			os.Exit(1)
+		}
+		return
+	}
 
 	fs := flag.NewFlagSet("trussiumctl", flag.ExitOnError)
 	showVersion := fs.Bool("version", false, "print the client version")
@@ -99,6 +105,28 @@ func runClusterDiagnostics(args []string) error {
 		return fmt.Errorf("cluster diagnostics reported unhealthy sections")
 	}
 	return nil
+}
+
+func runInstall(args []string) error {
+	fs := flag.NewFlagSet("install", flag.ContinueOnError)
+	dryRun := fs.Bool("dry-run", false, "render without changing the cluster (required)")
+	namespace := fs.String("namespace", "default", "Kubernetes namespace")
+	release := fs.String("release", "trussium", "Helm release name")
+	chart := fs.String("chart", "trussium/trussium", "Helm chart reference")
+	values := fs.String("values", "", "optional values file")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if !*dryRun {
+		fmt.Fprintln(os.Stderr, "install requires --dry-run; cluster mutations are not enabled yet")
+		return fmt.Errorf("dry-run required")
+	}
+	report, err := platform.RenderInstall(platform.ExecRunner{}, *namespace, *release, *chart, *values)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return err
+	}
+	return printJSON(report)
 }
 
 func runClusterInspection(kind string, args []string) error {
