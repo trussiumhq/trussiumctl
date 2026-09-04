@@ -13,7 +13,8 @@ diagnostics.
    status, Helm release inspection, compatibility checks, and bounded
    diagnostics with safe errors. The runtime health contract and local version
    compatibility preflight are delivered first (`runtime status` and
-   `compatibility check`).
+   `compatibility check`). The combined cluster report is now delivered as
+   `diagnostics cluster`.
 3. **Guarded changes:** explicit install, upgrade, and rollback commands that
    reuse the published Helm chart and Operator artifacts, require confirmation
    for mutations, and support dry-run output.

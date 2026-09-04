@@ -35,6 +35,12 @@ func main() {
 		}
 		return
 	}
+	if len(os.Args) > 2 && os.Args[1] == "diagnostics" && os.Args[2] == "cluster" {
+		if runClusterDiagnostics(os.Args[3:]) != nil {
+			os.Exit(1)
+		}
+		return
+	}
 
 	fs := flag.NewFlagSet("trussiumctl", flag.ExitOnError)
 	showVersion := fs.Bool("version", false, "print the client version")
@@ -69,6 +75,28 @@ func runCompatibility(args []string) error {
 	}
 	if !report.Compatible {
 		return fmt.Errorf("component versions are incompatible")
+	}
+	return nil
+}
+
+func runClusterDiagnostics(args []string) error {
+	fs := flag.NewFlagSet("diagnostics cluster", flag.ContinueOnError)
+	runtimeURL := fs.String("runtime-url", "http://127.0.0.1:9000", "runtime base URL")
+	namespace := fs.String("namespace", "default", "Kubernetes namespace")
+	operator := fs.String("operator", "trussium-operator", "Operator deployment name")
+	release := fs.String("release", "trussium", "Helm release name")
+	runtimeVersion := fs.String("runtime-version", "", "runtime semantic version")
+	chartVersion := fs.String("chart-version", "", "Helm chart semantic version")
+	operatorVersion := fs.String("operator-version", "", "Operator semantic version")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	report := platform.CollectClusterDiagnostics(platform.HTTPRuntimeClient{BaseURL: *runtimeURL}, platform.ExecRunner{}, *namespace, *operator, *release, *runtimeVersion, *chartVersion, *operatorVersion)
+	if err := printJSON(report); err != nil {
+		return err
+	}
+	if len(report.Errors) > 0 {
+		return fmt.Errorf("cluster diagnostics reported unhealthy sections")
 	}
 	return nil
 }
