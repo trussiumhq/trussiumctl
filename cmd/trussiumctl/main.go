@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/trussiumhq/trussiumctl/internal/platform"
@@ -126,6 +127,7 @@ func runInstall(args []string) error {
 	release := fs.String("release", "trussium", "Helm release name")
 	chart := fs.String("chart", "trussium/trussium", "Helm chart reference")
 	values := fs.String("values", "", "optional values file")
+	serverDryRun := fs.Bool("server-dry-run", false, "validate the rendered manifest against the Kubernetes API server")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -133,10 +135,33 @@ func runInstall(args []string) error {
 		fmt.Fprintln(os.Stderr, "install requires --dry-run; cluster mutations are not enabled yet")
 		return fmt.Errorf("dry-run required")
 	}
-	report, err := platform.RenderInstall(platform.ExecRunner{}, *namespace, *release, *chart, *values)
+	runner := platform.ExecRunner{}
+	manifest, err := platform.RenderInstallManifest(runner, *namespace, *release, *chart, *values)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return err
+	}
+	report := platform.InstallDryRunReport{Release: *release, Namespace: *namespace, Chart: *chart, Rendered: true, ManifestBytes: len(manifest)}
+	for _, line := range strings.Split(string(manifest), "\n") {
+		if strings.HasPrefix(line, "kind:") {
+			report.ResourceCount++
+		}
+	}
+	if *serverDryRun {
+		validation, validationErr := platform.ValidateManifest(runner, manifest)
+		if validationErr != nil {
+			return validationErr
+		}
+		if err := printJSON(struct {
+			Render     platform.InstallDryRunReport `json:"render"`
+			Validation platform.ServerValidation    `json:"validation"`
+		}{report, validation}); err != nil {
+			return err
+		}
+		if !validation.Valid {
+			return fmt.Errorf("server-side validation failed")
+		}
+		return nil
 	}
 	return printJSON(report)
 }

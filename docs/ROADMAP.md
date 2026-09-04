@@ -22,6 +22,8 @@ diagnostics.
    preflight and reports that cluster-state verification was not performed.
    Future mutating commands must use the explicit confirmation contract and
    server-side validation before execution is enabled.
+   `install --server-dry-run` now exercises that validation path without
+   persisting resources.
 3. **Guarded changes:** explicit install, upgrade, and rollback commands that
    reuse the published Helm chart and Operator artifacts, require confirmation
    for mutations, and support dry-run output.
