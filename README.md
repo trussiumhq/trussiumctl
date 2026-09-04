@@ -19,7 +19,7 @@ The CLI does not embed runtime execution logic, provider SDKs, or credentials.
 
 ## Development
 
-Requires Go 1.26 or newer.
+Requires Go 1.25 or newer.
 
 ```console
 go test ./...

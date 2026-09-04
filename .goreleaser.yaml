@@ -13,7 +13,7 @@ builds:
     goarch: [amd64, arm64]
 
 archives:
-  - formats: [tar.gz]
+  - format: tar.gz
 
 checksum:
   name_template: checksums.txt
