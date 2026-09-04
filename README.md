@@ -13,6 +13,8 @@ upgrade, and rollback workflows against the published Helm chart and Operator.
 ```console
 $ trussiumctl version
 dev
+$ trussiumctl runtime status --url http://127.0.0.1:9000
+{"status":"ready"}
 ```
 
 The CLI does not embed runtime execution logic, provider SDKs, or credentials.
