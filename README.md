@@ -19,6 +19,7 @@ $ trussiumctl operator status --namespace trussium-system
 $ trussiumctl helm status --namespace trussium-system --release trussium
 $ trussiumctl compatibility check --runtime 1.22.0 --chart 1.3.0 --operator 1.0.2
 $ trussiumctl diagnostics cluster --namespace trussium-system --runtime-version 1.22.0 --chart-version 1.3.0 --operator-version 1.0.2
+$ trussiumctl install --dry-run --namespace trussium-system --chart trussium/trussium
 ```
 
 The CLI does not embed runtime execution logic, provider SDKs, or credentials.
@@ -28,6 +29,8 @@ Compatibility checks are local and read-only; they fail closed when versions
 are missing, malformed, or below the current supported baseline.
 `diagnostics cluster` composes the four read-only checks and preserves bounded
 section results when one dependency is unavailable.
+`install` currently requires `--dry-run` and invokes only `helm template`; it
+cannot change a cluster.
 
 ## Development
 

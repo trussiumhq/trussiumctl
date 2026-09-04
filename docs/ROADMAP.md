@@ -14,7 +14,8 @@ diagnostics.
    diagnostics with safe errors. The runtime health contract and local version
    compatibility preflight are delivered first (`runtime status` and
    `compatibility check`). The combined cluster report is now delivered as
-   `diagnostics cluster`.
+   `diagnostics cluster`. Helm rendering is now available through the guarded
+   `install --dry-run` command; mutating installs remain intentionally disabled.
 3. **Guarded changes:** explicit install, upgrade, and rollback commands that
    reuse the published Helm chart and Operator artifacts, require confirmation
    for mutations, and support dry-run output.
