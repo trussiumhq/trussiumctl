@@ -37,6 +37,9 @@ cannot change a cluster.
 the target chart without invoking `helm upgrade`.
 `rollback` requires `--dry-run`, validates the target release, and renders the
 rollback chart without invoking `helm rollback`.
+Rollback reports include an explicit verification result; dry-run verification
+is always marked as not performed. Future mutating commands will require the
+exact confirmation token `TRUSSIUM`.
 
 ## Development
 
