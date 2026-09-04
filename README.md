@@ -17,11 +17,14 @@ $ trussiumctl runtime status --url http://127.0.0.1:9000
 {"status":"ready"}
 $ trussiumctl operator status --namespace trussium-system
 $ trussiumctl helm status --namespace trussium-system --release trussium
+$ trussiumctl compatibility check --runtime 1.22.0 --chart 1.3.0 --operator 1.0.2
 ```
 
 The CLI does not embed runtime execution logic, provider SDKs, or credentials.
 Inspection commands invoke only read-only `kubectl get` and `helm status`
 operations and return bounded JSON suitable for automation.
+Compatibility checks are local and read-only; they fail closed when versions
+are missing, malformed, or below the current supported baseline.
 
 ## Development
 

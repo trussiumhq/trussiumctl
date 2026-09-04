@@ -29,6 +29,12 @@ func main() {
 		}
 		return
 	}
+	if len(os.Args) > 1 && os.Args[1] == "compatibility" {
+		if runCompatibility(os.Args[2:]) != nil {
+			os.Exit(1)
+		}
+		return
+	}
 
 	fs := flag.NewFlagSet("trussiumctl", flag.ExitOnError)
 	showVersion := fs.Bool("version", false, "print the client version")
@@ -43,6 +49,28 @@ func main() {
 		return
 	}
 	fs.Usage()
+}
+
+func runCompatibility(args []string) error {
+	if len(args) == 0 || args[0] != "check" {
+		fmt.Fprintln(os.Stderr, "usage: trussiumctl compatibility check --runtime VERSION --chart VERSION --operator VERSION")
+		return fmt.Errorf("invalid compatibility command")
+	}
+	fs := flag.NewFlagSet("compatibility check", flag.ContinueOnError)
+	runtime := fs.String("runtime", "", "runtime semantic version")
+	chart := fs.String("chart", "", "Helm chart semantic version")
+	operator := fs.String("operator", "", "Operator semantic version")
+	if err := fs.Parse(args[1:]); err != nil {
+		return err
+	}
+	report := platform.CheckCompatibility(*runtime, *chart, *operator)
+	if err := printJSON(report); err != nil {
+		return err
+	}
+	if !report.Compatible {
+		return fmt.Errorf("component versions are incompatible")
+	}
+	return nil
 }
 
 func runClusterInspection(kind string, args []string) error {
