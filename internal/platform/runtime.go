@@ -37,7 +37,7 @@ func (c HTTPRuntimeClient) Ready() (RuntimeStatus, error) {
 	if err != nil {
 		return RuntimeStatus{}, fmt.Errorf("runtime unavailable")
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return RuntimeStatus{}, fmt.Errorf("runtime returned status %d", response.StatusCode)
 	}
