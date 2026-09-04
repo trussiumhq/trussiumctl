@@ -18,6 +18,8 @@ diagnostics.
    `install --dry-run` command; mutating installs remain intentionally disabled.
    The equivalent `upgrade --dry-run` preflight now validates current and target
    versions before rendering the target chart.
+   `rollback --dry-run` now provides the corresponding non-mutating rollback
+   preflight.
 3. **Guarded changes:** explicit install, upgrade, and rollback commands that
    reuse the published Helm chart and Operator artifacts, require confirmation
    for mutations, and support dry-run output.
