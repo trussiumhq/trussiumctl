@@ -128,12 +128,19 @@ func runInstall(args []string) error {
 	chart := fs.String("chart", "trussium/trussium", "Helm chart reference")
 	values := fs.String("values", "", "optional values file")
 	serverDryRun := fs.Bool("server-dry-run", false, "validate the rendered manifest against the Kubernetes API server")
+	confirm := fs.String("confirm", "", "required exact token for cluster mutation")
+	timeout := fs.Duration("timeout", 10*time.Minute, "Helm operation timeout")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	if !*dryRun {
-		fmt.Fprintln(os.Stderr, "install requires --dry-run; cluster mutations are not enabled yet")
-		return fmt.Errorf("dry-run required")
+		if err := platform.RequireConfirmation(*confirm); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return err
+		}
+		report, err := platform.ApplyInstall(platform.ExecRunner{}, *namespace, *release, *chart, *values, *timeout)
+		_ = printJSON(report)
+		return err
 	}
 	runner := platform.ExecRunner{}
 	manifest, err := platform.RenderInstallManifest(runner, *namespace, *release, *chart, *values)

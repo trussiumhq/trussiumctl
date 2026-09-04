@@ -37,6 +37,8 @@ cannot change a cluster.
 With `--server-dry-run`, the rendered manifest is additionally sent to
 `kubectl apply --dry-run=server`; the API server validates it without storing
 resources.
+The guarded write form requires `--confirm TRUSSIUM`, validates first, waits
+for Helm completion, and verifies the resulting release status.
 `upgrade` also requires `--dry-run`, validates both version sets, and renders
 the target chart without invoking `helm upgrade`.
 `rollback` requires `--dry-run`, validates the target release, and renders the
