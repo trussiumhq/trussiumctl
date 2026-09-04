@@ -17,8 +17,8 @@ func main() {
 	fs := flag.NewFlagSet("trussiumctl", flag.ExitOnError)
 	showVersion := fs.Bool("version", false, "print the client version")
 	fs.Usage = func() {
-		fmt.Fprintln(fs.Output(), "trussiumctl manages Trussium Kubernetes and Helm workflows.")
-		fmt.Fprintln(fs.Output(), "Runtime execution remains owned by the Trussium Python service.")
+		_, _ = fmt.Fprintln(fs.Output(), "trussiumctl manages Trussium Kubernetes and Helm workflows.")
+		_, _ = fmt.Fprintln(fs.Output(), "Runtime execution remains owned by the Trussium Python service.")
 		fs.PrintDefaults()
 	}
 	_ = fs.Parse(os.Args[1:])
