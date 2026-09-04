@@ -47,6 +47,12 @@ func main() {
 		}
 		return
 	}
+	if len(os.Args) > 1 && os.Args[1] == "upgrade" {
+		if runUpgrade(os.Args[2:]) != nil {
+			os.Exit(1)
+		}
+		return
+	}
 
 	fs := flag.NewFlagSet("trussiumctl", flag.ExitOnError)
 	showVersion := fs.Bool("version", false, "print the client version")
@@ -127,6 +133,33 @@ func runInstall(args []string) error {
 		return err
 	}
 	return printJSON(report)
+}
+
+func runUpgrade(args []string) error {
+	fs := flag.NewFlagSet("upgrade", flag.ContinueOnError)
+	dryRun := fs.Bool("dry-run", false, "render without changing the cluster (required)")
+	namespace := fs.String("namespace", "default", "Kubernetes namespace")
+	release := fs.String("release", "trussium", "Helm release name")
+	chart := fs.String("chart", "trussium/trussium", "target Helm chart reference")
+	values := fs.String("values", "", "optional values file")
+	currentRuntime := fs.String("current-runtime", "", "current runtime semantic version")
+	currentChart := fs.String("current-chart", "", "current chart semantic version")
+	currentOperator := fs.String("current-operator", "", "current Operator semantic version")
+	targetRuntime := fs.String("target-runtime", "", "target runtime semantic version")
+	targetChart := fs.String("target-chart", "", "target chart semantic version")
+	targetOperator := fs.String("target-operator", "", "target Operator semantic version")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if !*dryRun {
+		fmt.Fprintln(os.Stderr, "upgrade requires --dry-run; cluster mutations are not enabled yet")
+		return fmt.Errorf("dry-run required")
+	}
+	report := platform.PlanUpgrade(platform.ExecRunner{}, *namespace, *release, *chart, *values, [3]string{*currentRuntime, *currentChart, *currentOperator}, [3]string{*targetRuntime, *targetChart, *targetOperator})
+	if err := printJSON(report); err != nil {
+		return err
+	}
+	return platform.ValidateUpgrade(report)
 }
 
 func runClusterInspection(kind string, args []string) error {
