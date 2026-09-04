@@ -20,6 +20,7 @@ $ trussiumctl helm status --namespace trussium-system --release trussium
 $ trussiumctl compatibility check --runtime 1.22.0 --chart 1.3.0 --operator 1.0.2
 $ trussiumctl diagnostics cluster --namespace trussium-system --runtime-version 1.22.0 --chart-version 1.3.0 --operator-version 1.0.2
 $ trussiumctl install --dry-run --namespace trussium-system --chart trussium/trussium
+$ trussiumctl upgrade --dry-run --namespace trussium-system --current-runtime 1.22.0 --current-chart 1.3.0 --current-operator 1.0.2 --target-runtime 1.23.0 --target-chart 1.3.0 --target-operator 1.0.2
 ```
 
 The CLI does not embed runtime execution logic, provider SDKs, or credentials.
@@ -31,6 +32,8 @@ are missing, malformed, or below the current supported baseline.
 section results when one dependency is unavailable.
 `install` currently requires `--dry-run` and invokes only `helm template`; it
 cannot change a cluster.
+`upgrade` also requires `--dry-run`, validates both version sets, and renders
+the target chart without invoking `helm upgrade`.
 
 ## Development
 
