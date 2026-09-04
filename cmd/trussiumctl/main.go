@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -22,6 +23,12 @@ func main() {
 		}
 		return
 	}
+	if len(os.Args) > 1 && (os.Args[1] == "operator" || os.Args[1] == "helm") {
+		if runClusterInspection(os.Args[1], os.Args[2:]) != nil {
+			os.Exit(1)
+		}
+		return
+	}
 
 	fs := flag.NewFlagSet("trussiumctl", flag.ExitOnError)
 	showVersion := fs.Bool("version", false, "print the client version")
@@ -36,6 +43,44 @@ func main() {
 		return
 	}
 	fs.Usage()
+}
+
+func runClusterInspection(kind string, args []string) error {
+	fs := flag.NewFlagSet(kind+" status", flag.ContinueOnError)
+	namespace := fs.String("namespace", "default", "Kubernetes namespace")
+	name := fs.String("name", "trussium-operator", "deployment name")
+	release := fs.String("release", "trussium", "Helm release name")
+	if len(args) == 0 || args[0] != "status" {
+		fmt.Fprintf(os.Stderr, "usage: trussiumctl %s status [flags]\n", kind)
+		return fmt.Errorf("invalid %s command", kind)
+	}
+	if err := fs.Parse(args[1:]); err != nil {
+		return err
+	}
+	runner := platform.ExecRunner{}
+	if kind == "operator" {
+		status, err := platform.OperatorStatusFor(runner, *namespace, *name)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return err
+		}
+		return printJSON(status)
+	}
+	status, err := platform.HelmStatusFor(runner, *namespace, *release)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return err
+	}
+	return printJSON(status)
+}
+
+func printJSON(value any) error {
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	_, _ = fmt.Println(string(encoded))
+	return nil
 }
 
 func runRuntime(args []string) error {
