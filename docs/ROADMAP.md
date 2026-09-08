@@ -8,8 +8,9 @@ diagnostics.
 
 1. **Foundation (current):** stable version/help contract, reproducible Go
    builds, tests, linting, vulnerability scanning, CodeQL, semantic tags, and
-   release-ready archives. Artifact signing remains a future supply-chain
-   enhancement; current releases publish checksummed archives.
+   release-ready archives and GitHub artifact provenance attestations. Current
+   releases publish checksummed archives with keyless Sigstore-backed workflow
+   attestations.
 2. **Read-only operations:** Kubernetes context discovery, runtime/operator
    status, Helm release inspection, compatibility checks, and bounded
    diagnostics with safe errors. The runtime health contract and local version
