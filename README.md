@@ -46,8 +46,10 @@ without invoking `helm upgrade`. The guarded write form requires
 `rollback` requires `--dry-run`, validates the target release, and renders the
 rollback chart without invoking `helm rollback`.
 Rollback reports include an explicit verification result; dry-run verification
-is always marked as not performed. Future mutating commands will require the
-exact confirmation token `TRUSSIUM`.
+is always marked as not performed. Mutating commands require the exact
+confirmation token `TRUSSIUM`.
+The guarded write form requires `--confirm TRUSSIUM`, validates the rollback
+chart server-side, runs `helm rollback --wait`, and verifies the release status.
 
 ## Development
 
