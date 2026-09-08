@@ -186,12 +186,19 @@ func runUpgrade(args []string) error {
 	targetRuntime := fs.String("target-runtime", "", "target runtime semantic version")
 	targetChart := fs.String("target-chart", "", "target chart semantic version")
 	targetOperator := fs.String("target-operator", "", "target Operator semantic version")
+	confirm := fs.String("confirm", "", "required exact token for cluster mutation")
+	timeout := fs.Duration("timeout", 10*time.Minute, "Helm operation timeout")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	if !*dryRun {
-		fmt.Fprintln(os.Stderr, "upgrade requires --dry-run; cluster mutations are not enabled yet")
-		return fmt.Errorf("dry-run required")
+		if err := platform.RequireConfirmation(*confirm); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return err
+		}
+		report, err := platform.ApplyUpgrade(platform.ExecRunner{}, *namespace, *release, *chart, *values, [3]string{*currentRuntime, *currentChart, *currentOperator}, [3]string{*targetRuntime, *targetChart, *targetOperator}, *timeout)
+		_ = printJSON(report)
+		return err
 	}
 	report := platform.PlanUpgrade(platform.ExecRunner{}, *namespace, *release, *chart, *values, [3]string{*currentRuntime, *currentChart, *currentOperator}, [3]string{*targetRuntime, *targetChart, *targetOperator})
 	if err := printJSON(report); err != nil {

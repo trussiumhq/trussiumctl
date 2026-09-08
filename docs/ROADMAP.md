@@ -26,6 +26,8 @@ diagnostics.
    persisting resources.
    Guarded `install` now supports explicit confirmation, validation, bounded
    timeout, and post-install verification.
+   Guarded `upgrade` now uses the same confirmation, validation, timeout, and
+   post-upgrade verification contract.
 3. **Guarded changes:** explicit install, upgrade, and rollback commands that
    reuse the published Helm chart and Operator artifacts, require confirmation
    for mutations, and support dry-run output.
