@@ -6,9 +6,9 @@ operations. It will own Kubernetes and Helm workflows while the Python
 
 ## Current status
 
-The repository starts with a versioned command boundary. The next milestones
-add read-only cluster inspection, diagnostics, and then guarded install,
-upgrade, and rollback workflows against the published Helm chart and Operator.
+The repository provides a versioned command boundary for read-only inspection,
+diagnostics, and guarded install, upgrade, and rollback workflows against the
+published Helm chart and Operator.
 
 ```console
 $ trussiumctl version
