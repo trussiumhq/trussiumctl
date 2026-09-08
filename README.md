@@ -39,8 +39,10 @@ With `--server-dry-run`, the rendered manifest is additionally sent to
 resources.
 The guarded write form requires `--confirm TRUSSIUM`, validates first, waits
 for Helm completion, and verifies the resulting release status.
-`upgrade` also requires `--dry-run`, validates both version sets, and renders
-the target chart without invoking `helm upgrade`.
+`upgrade --dry-run` validates both version sets and renders the target chart
+without invoking `helm upgrade`. The guarded write form requires
+`--confirm TRUSSIUM`, validates the target chart server-side, runs
+`helm upgrade --install --wait`, and verifies the release status.
 `rollback` requires `--dry-run`, validates the target release, and renders the
 rollback chart without invoking `helm rollback`.
 Rollback reports include an explicit verification result; dry-run verification
