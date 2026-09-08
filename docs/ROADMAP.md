@@ -20,8 +20,8 @@ diagnostics.
    versions before rendering the target chart.
    `rollback --dry-run` now provides the corresponding non-mutating rollback
    preflight and reports that cluster-state verification was not performed.
-   Future mutating commands must use the explicit confirmation contract and
-   server-side validation before execution is enabled.
+   Mutating commands use the explicit confirmation contract and server-side
+   validation before execution.
    `install --server-dry-run` now exercises that validation path without
    persisting resources.
    Guarded `install` now supports explicit confirmation, validation, bounded
