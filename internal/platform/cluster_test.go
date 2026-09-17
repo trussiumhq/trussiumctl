@@ -48,6 +48,26 @@ func TestDiscoverComponentVersions(t *testing.T) {
 	}
 }
 
+func TestResolveCurrentVersionsPreservesExplicitOverrides(t *testing.T) {
+	explicit := [3]string{"1.25.0", "1.3.1", "1.0.3"}
+	resolved, err := ResolveCurrentVersions(&fakeRunner{}, "namespace", "release", "operator", explicit)
+	if err != nil || resolved != explicit {
+		t.Fatalf("resolved=%v err=%v", resolved, err)
+	}
+}
+
+func TestResolveCurrentVersionsDiscoversMissingValues(t *testing.T) {
+	runner := &sequenceRunner{outputs: [][]byte{
+		[]byte(`{"info":{"status":"deployed"},"chart":{"metadata":{"name":"trussium","version":"1.3.1"}},"config":{"appVersion":"1.27.0"}}`),
+		[]byte(`{"metadata":{"name":"trussium-operator"},"spec":{"replicas":1,"template":{"spec":{"containers":[{"image":"ghcr.io/trussiumhq/trussium-operator:v1.0.3"}]}}},"status":{"availableReplicas":1}}`),
+	}}
+	resolved, err := ResolveCurrentVersions(runner, "namespace", "release", "operator", [3]string{"", "", ""})
+	want := [3]string{"1.27.0", "1.3.1", "v1.0.3"}
+	if err != nil || resolved != want {
+		t.Fatalf("resolved=%v err=%v", resolved, err)
+	}
+}
+
 type sequenceRunner struct {
 	outputs [][]byte
 	index   int

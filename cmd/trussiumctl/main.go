@@ -178,6 +178,7 @@ func runUpgrade(args []string) error {
 	dryRun := fs.Bool("dry-run", false, "render without changing the cluster (required)")
 	namespace := fs.String("namespace", "default", "Kubernetes namespace")
 	release := fs.String("release", "trussium", "Helm release name")
+	operator := fs.String("operator", "trussium-operator", "Operator deployment name used for version discovery")
 	chart := fs.String("chart", "trussium/trussium", "target Helm chart reference")
 	values := fs.String("values", "", "optional values file")
 	currentRuntime := fs.String("current-runtime", "", "current runtime semantic version")
@@ -200,7 +201,12 @@ func runUpgrade(args []string) error {
 		_ = printJSON(report)
 		return err
 	}
-	report := platform.PlanUpgrade(platform.ExecRunner{}, *namespace, *release, *chart, *values, [3]string{*currentRuntime, *currentChart, *currentOperator}, [3]string{*targetRuntime, *targetChart, *targetOperator})
+	runner := platform.ExecRunner{}
+	current, err := platform.ResolveCurrentVersions(runner, *namespace, *release, *operator, [3]string{*currentRuntime, *currentChart, *currentOperator})
+	if err != nil {
+		return err
+	}
+	report := platform.PlanUpgrade(runner, *namespace, *release, *chart, *values, current, [3]string{*targetRuntime, *targetChart, *targetOperator})
 	if err := printJSON(report); err != nil {
 		return err
 	}
