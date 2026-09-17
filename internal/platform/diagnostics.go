@@ -4,12 +4,13 @@ type ClusterDiagnostics struct {
 	Runtime       RuntimeStatus       `json:"runtime,omitempty"`
 	Operator      OperatorStatus      `json:"operator,omitempty"`
 	Helm          HelmStatus          `json:"helm,omitempty"`
+	Versions      ComponentVersions   `json:"versions,omitempty"`
 	Compatibility CompatibilityReport `json:"compatibility,omitempty"`
 	Errors        []string            `json:"errors,omitempty"`
 }
 
 func CollectClusterDiagnostics(runtime RuntimeClient, runner CommandRunner, namespace, operator, release, runtimeVersion, chartVersion, operatorVersion string) ClusterDiagnostics {
-	report := ClusterDiagnostics{Compatibility: CheckCompatibility(runtimeVersion, chartVersion, operatorVersion)}
+	report := ClusterDiagnostics{}
 	if status, err := runtime.Ready(); err != nil {
 		report.Errors = append(report.Errors, err.Error())
 	} else {
@@ -25,6 +26,17 @@ func CollectClusterDiagnostics(runtime RuntimeClient, runner CommandRunner, name
 	} else {
 		report.Helm = status
 	}
+	if runtimeVersion == "" {
+		runtimeVersion = report.Helm.App
+	}
+	if chartVersion == "" {
+		chartVersion = report.Helm.ChartVersion
+	}
+	if operatorVersion == "" {
+		operatorVersion = report.Operator.Version
+	}
+	report.Versions = ComponentVersions{Runtime: runtimeVersion, Chart: chartVersion, Operator: operatorVersion}
+	report.Compatibility = CheckCompatibility(runtimeVersion, chartVersion, operatorVersion)
 	if !report.Compatibility.Compatible {
 		report.Errors = append(report.Errors, report.Compatibility.Reasons...)
 	}

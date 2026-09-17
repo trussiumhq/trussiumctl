@@ -18,7 +18,7 @@ $ trussiumctl runtime status --url http://127.0.0.1:9000
 $ trussiumctl operator status --namespace trussium-system
 $ trussiumctl helm status --namespace trussium-system --release trussium
 $ trussiumctl compatibility check --runtime 1.27.0 --chart 1.3.1 --operator 1.0.3
-$ trussiumctl diagnostics cluster --namespace trussium-system --runtime-version 1.27.0 --chart-version 1.3.1 --operator-version 1.0.3
+$ trussiumctl diagnostics cluster --namespace trussium-system
 $ trussiumctl install --dry-run --namespace trussium-system --chart trussium/trussium
 $ trussiumctl install --dry-run --server-dry-run --namespace trussium-system --chart trussium/trussium
 $ trussiumctl upgrade --dry-run --namespace trussium-system --current-runtime 1.27.0 --current-chart 1.3.1 --current-operator 1.0.3 --target-runtime 1.28.0 --target-chart 1.3.1 --target-operator 1.0.3
@@ -32,6 +32,9 @@ Compatibility checks are local and read-only; they fail closed when versions
 are missing, malformed, or below the current supported baseline.
 `diagnostics cluster` composes the four read-only checks and preserves bounded
 section results when one dependency is unavailable.
+When version flags are omitted, it discovers the deployed runtime app version,
+Helm chart version, and Operator image tag from the cluster; explicit version
+flags remain available to override discovery for planned-change checks.
 `install` currently requires `--dry-run` and invokes only `helm template`; it
 cannot change a cluster.
 With `--server-dry-run`, the rendered manifest is additionally sent to
