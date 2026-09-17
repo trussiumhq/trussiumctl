@@ -179,3 +179,25 @@ func DiscoverComponentVersions(runner CommandRunner, namespace, release, operato
 	}
 	return versions, nil
 }
+
+// ResolveCurrentVersions fills omitted upgrade baseline values from the cluster.
+func ResolveCurrentVersions(runner CommandRunner, namespace, release, operator string, explicit [3]string) ([3]string, error) {
+	resolved := explicit
+	if resolved[0] != "" && resolved[1] != "" && resolved[2] != "" {
+		return resolved, nil
+	}
+	discovered, err := DiscoverComponentVersions(runner, namespace, release, operator)
+	if err != nil {
+		return [3]string{}, err
+	}
+	if resolved[0] == "" {
+		resolved[0] = discovered.Runtime
+	}
+	if resolved[1] == "" {
+		resolved[1] = discovered.Chart
+	}
+	if resolved[2] == "" {
+		resolved[2] = discovered.Operator
+	}
+	return resolved, nil
+}
