@@ -15,6 +15,17 @@ type RollbackReport struct {
 	Verified            bool                `json:"verified"`
 }
 
+// GuardedRollback checks confirmation before running the validated rollback
+// workflow. The target versions and optional revision are supplied explicitly
+// because rollback intent must be auditable before a mutation begins.
+func GuardedRollback(runner MutationRunner, namespace, release, chart, values string, revision int, confirmation string, target [3]string, timeout time.Duration) (RollbackReport, error) {
+	var report RollbackReport
+	if err := RequireConfirmation(confirmation); err != nil {
+		return report, err
+	}
+	return ApplyRollback(runner, namespace, release, chart, values, revision, target, timeout)
+}
+
 func ApplyRollback(runner MutationRunner, namespace, release, chart, values string, revision int, target [3]string, timeout time.Duration) (RollbackReport, error) {
 	report := RollbackReport{Release: release, Namespace: namespace, Revision: revision, TargetCompatibility: CheckCompatibility(target[0], target[1], target[2])}
 	if !report.TargetCompatibility.Compatible {
