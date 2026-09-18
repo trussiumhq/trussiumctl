@@ -226,11 +226,7 @@ func runRollback(args []string) error {
 		return err
 	}
 	if !*dryRun {
-		if err := platform.RequireConfirmation(*confirm); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return err
-		}
-		report, err := platform.ApplyRollback(platform.ExecRunner{}, *namespace, *release, *chart, *values, *revision, [3]string{*targetRuntime, *targetChart, *targetOperator}, *timeout)
+		report, err := platform.GuardedRollback(platform.ExecRunner{}, *namespace, *release, *chart, *values, *revision, *confirm, [3]string{*targetRuntime, *targetChart, *targetOperator}, *timeout)
 		_ = printJSON(report)
 		return err
 	}

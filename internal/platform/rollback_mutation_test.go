@@ -1,6 +1,9 @@
 package platform
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestApplyRollbackValidatesBeforeApplyingAndVerifies(t *testing.T) {
 	runner := &mutationRunner{}
@@ -22,6 +25,26 @@ func TestApplyRollbackValidatesBeforeApplyingAndVerifies(t *testing.T) {
 func TestApplyRollbackRejectsIncompatibleTargetBeforeRendering(t *testing.T) {
 	runner := &mutationRunner{}
 	_, err := ApplyRollback(runner, "default", "trussium", "chart", "", 0, [3]string{"2.0.0", "1.3.0", "1.0.2"}, 0)
+	if err == nil || len(runner.commands) != 0 {
+		t.Fatalf("err=%v commands=%v", err, runner.commands)
+	}
+}
+
+func TestGuardedRollbackConfirmsValidatesAndVerifies(t *testing.T) {
+	runner := &mutationRunner{}
+	report, err := GuardedRollback(runner, "trussium-system", "trussium", "chart", "", 4, "TRUSSIUM", [3]string{"1.22.0", "1.3.0", "1.0.2"}, 0)
+	if err != nil || !report.Applied || !report.Verified || !report.Validation.Valid || report.Revision != 4 {
+		t.Fatalf("report=%+v err=%v", report, err)
+	}
+	want := []string{"helm template", "kubectl apply", "helm rollback", "helm status"}
+	if !reflect.DeepEqual(runner.commands, want) {
+		t.Fatalf("commands=%v", runner.commands)
+	}
+}
+
+func TestGuardedRollbackRejectsConfirmationBeforeRendering(t *testing.T) {
+	runner := &mutationRunner{}
+	_, err := GuardedRollback(runner, "trussium-system", "trussium", "chart", "", 4, "no", [3]string{"1.22.0", "1.3.0", "1.0.2"}, 0)
 	if err == nil || len(runner.commands) != 0 {
 		t.Fatalf("err=%v commands=%v", err, runner.commands)
 	}

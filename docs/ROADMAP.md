@@ -35,6 +35,8 @@ diagnostics.
    post-upgrade verification.
    Guarded `rollback` now uses the same confirmation, validation, timeout, and
    post-rollback verification contract.
+   The guarded rollback path is covered end to end, including confirmation
+   ordering, target compatibility, revision-aware mutation, and verification.
 3. **Guarded changes:** explicit install, upgrade, and rollback commands that
    reuse the published Helm chart and Operator artifacts, require confirmation
    for mutations, and support dry-run output.
