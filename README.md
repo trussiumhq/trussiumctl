@@ -37,6 +37,9 @@ Helm chart version, and Operator image tag from the cluster; explicit version
 flags remain available to override discovery for planned-change checks.
 `upgrade --dry-run` uses the same discovery for omitted current-version flags;
 provide any current version explicitly when validating a hypothetical baseline.
+Guarded upgrades use the same read-only discovery before requesting confirmation
+or rendering a manifest, and fail closed if the deployed baseline cannot be
+resolved. This prevents a mutation from proceeding with an unknown baseline.
 `install` currently requires `--dry-run` and invokes only `helm template`; it
 cannot change a cluster.
 With `--server-dry-run`, the rendered manifest is additionally sent to

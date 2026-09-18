@@ -192,18 +192,18 @@ func runUpgrade(args []string) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	runner := platform.ExecRunner{}
+	current, err := platform.ResolveCurrentVersions(runner, *namespace, *release, *operator, [3]string{*currentRuntime, *currentChart, *currentOperator})
+	if err != nil {
+		return fmt.Errorf("resolve current component versions: %w", err)
+	}
 	if !*dryRun {
 		if err := platform.RequireConfirmation(*confirm); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return err
 		}
-		report, err := platform.ApplyUpgrade(platform.ExecRunner{}, *namespace, *release, *chart, *values, [3]string{*currentRuntime, *currentChart, *currentOperator}, [3]string{*targetRuntime, *targetChart, *targetOperator}, *timeout)
+		report, err := platform.ApplyUpgrade(runner, *namespace, *release, *chart, *values, current, [3]string{*targetRuntime, *targetChart, *targetOperator}, *timeout)
 		_ = printJSON(report)
-		return err
-	}
-	runner := platform.ExecRunner{}
-	current, err := platform.ResolveCurrentVersions(runner, *namespace, *release, *operator, [3]string{*currentRuntime, *currentChart, *currentOperator})
-	if err != nil {
 		return err
 	}
 	report := platform.PlanUpgrade(runner, *namespace, *release, *chart, *values, current, [3]string{*targetRuntime, *targetChart, *targetOperator})
