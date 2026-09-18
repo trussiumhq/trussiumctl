@@ -68,6 +68,16 @@ func TestResolveCurrentVersionsDiscoversMissingValues(t *testing.T) {
 	}
 }
 
+func TestResolveCurrentVersionsFailsClosedWhenDiscoveryIsIncomplete(t *testing.T) {
+	runner := &sequenceRunner{outputs: [][]byte{
+		[]byte(`{"info":{"status":"deployed"},"chart":{"metadata":{"name":"trussium","version":"1.3.1"}},"config":{"appVersion":""}}`),
+		[]byte(`{"metadata":{"name":"trussium-operator"},"spec":{"replicas":1,"template":{"spec":{"containers":[]}}},"status":{"availableReplicas":1}}`),
+	}}
+	if _, err := ResolveCurrentVersions(runner, "namespace", "release", "operator", [3]string{"", "", ""}); err == nil {
+		t.Fatal("expected incomplete discovery to fail")
+	}
+}
+
 type sequenceRunner struct {
 	outputs [][]byte
 	index   int
