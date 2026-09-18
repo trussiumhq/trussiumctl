@@ -15,6 +15,21 @@ type UpgradeReport struct {
 	Verified             bool                `json:"verified"`
 }
 
+// GuardedUpgrade resolves the deployed baseline, checks confirmation, and then
+// runs the validated upgrade workflow. Discovery and confirmation happen before
+// any manifest rendering or mutation.
+func GuardedUpgrade(runner MutationRunner, namespace, release, operator, chart, values, confirmation string, explicitCurrent, target [3]string, timeout time.Duration) (UpgradeReport, error) {
+	var report UpgradeReport
+	if err := RequireConfirmation(confirmation); err != nil {
+		return report, err
+	}
+	current, err := ResolveCurrentVersions(runner, namespace, release, operator, explicitCurrent)
+	if err != nil {
+		return report, fmt.Errorf("resolve current component versions: %w", err)
+	}
+	return ApplyUpgrade(runner, namespace, release, chart, values, current, target, timeout)
+}
+
 func ApplyUpgrade(runner MutationRunner, namespace, release, chart, values string, current, target [3]string, timeout time.Duration) (UpgradeReport, error) {
 	report := UpgradeReport{
 		Release:              release,
