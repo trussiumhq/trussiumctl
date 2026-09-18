@@ -13,7 +13,8 @@ workflow. Contributors do not create version tags or upload archives by hand.
 - Update `README.md` and `docs/ROADMAP.md` when user-visible behavior changes.
 - Review the generated release scope with `git log <last-tag>..main`.
 
-The current published baseline is `v1.13.0`. The subsequent releases add
+The current published baseline is `v1.16.0`. Releases `v1.14.0` through
+`v1.16.0` add
 deployed-version discovery for diagnostics and upgrade preflights, fail-closed
 baseline discovery for guarded upgrades, and end-to-end guarded upgrade and
 rollback safety coverage.
