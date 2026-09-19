@@ -80,7 +80,8 @@ gh attestation verify path/to/checksums.txt --repo trussiumhq/trussiumctl
 ```
 
 See [docs/RELEASE.md](docs/RELEASE.md) for the complete release-readiness and
-post-release verification checklist.
+post-release verification checklist, including the required Attestations:
+read permission for `gh attestation verify`.
 
 ## License
 
