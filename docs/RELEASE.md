@@ -42,6 +42,12 @@ gh release download "$RELEASE_VERSION" --repo trussiumhq/trussiumctl --dir /tmp/
 gh attestation verify /tmp/trussiumctl-release/checksums.txt --repo trussiumhq/trussiumctl
 ```
 
+The token used by `gh attestation verify` must have GitHub's **Attestations:
+read** permission. Without it, GitHub returns HTTP 404 for the attestation API
+even when the public attestation record exists. The release workflow itself
+uses `attestations: write` and reports the uploaded attestation URL in its
+summary.
+
 Verify that the release contains archives for `linux/amd64`, `linux/arm64`,
 `darwin/amd64`, and `darwin/arm64`, then test the matching binary:
 
