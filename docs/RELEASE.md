@@ -38,15 +38,25 @@ checkout:
 
 ```console
 gh release view "$RELEASE_VERSION" --repo trussiumhq/trussiumctl
-gh release download "$RELEASE_VERSION" --repo trussiumhq/trussiumctl --dir /tmp/trussiumctl-release
-gh attestation verify /tmp/trussiumctl-release/checksums.txt --repo trussiumhq/trussiumctl
+gh release download "$RELEASE_VERSION" --repo trussiumhq/trussiumctl \
+  --pattern checksums.txt \
+  --pattern 'trussiumctl_*_linux_amd64.tar.gz' \
+  --dir /tmp/trussiumctl-release
+cd /tmp/trussiumctl-release
+sha256sum -c checksums.txt --ignore-missing
+gh attestation verify trussiumctl_*_linux_amd64.tar.gz \
+  --repo trussiumhq/trussiumctl
 ```
 
-The token used by `gh attestation verify` must have GitHub's **Attestations:
-read** permission. Without it, GitHub returns HTTP 404 for the attestation API
-even when the public attestation record exists. The release workflow itself
-uses `attestations: write` and reports the uploaded attestation URL in its
-summary.
+`actions/attest` receives `checksums.txt` as a subject manifest and creates
+attestations for each archive listed in it; the checksum file itself is not an
+attested subject. Repeat the verification for each platform archive before
+announcing a release.
+
+For fine-grained tokens, grant GitHub's **Attestations: read** permission if
+`gh attestation verify` returns HTTP 404. Classic tokens with repository read
+access may verify public subjects directly. The release workflow itself uses
+`attestations: write` and reports the uploaded attestation URL in its summary.
 
 Verify that the release contains archives for `linux/amd64`, `linux/arm64`,
 `darwin/amd64`, and `darwin/arm64`, then test the matching binary:
